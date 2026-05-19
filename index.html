@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart PTW System - الاعتماد الإلكتروني</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; direction: rtl; padding: 20px; margin: 0; }
+    .card { max-width: 500px; background: white; margin: 20px auto; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 6px solid #001F54; }
+    h2 { color: #001F54; text-align: center; margin-bottom: 20px; }
+    .form-group { margin-bottom: 15px; }
+    label { font-weight: bold; display: block; margin-bottom: 6px; color: #333; }
+    .static-table { width: 100%; background-color: #e9ecef; border-radius: 8px; border: 1px solid #ced4da; padding: 10px; font-size: 15px; color: #495057; box-sizing: border-box; }
+    .static-table table { width: 100%; border-collapse: collapse; }
+    .static-table td { padding: 8px; border-bottom: 1px solid #dee2e6; }
+    .static-table tr:last-child td { border-bottom: none; }
+    textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ced4da; box-sizing: border-box; resize: vertical; min-height: 70px; }
+    .radio-group { background: #f8f9fa; padding: 12px; border-radius: 8px; border: 1px solid #ced4da; }
+    .radio-option { margin-bottom: 10px; display: flex; align-items: center; }
+    .radio-option:last-child { margin-bottom: 0; }
+    input[type="radio"] { width: 18px; height: 18px; margin-left: 10px; cursor: pointer; }
+    .btn { width: 100%; background-color: #007bff; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+    .btn:hover { background-color: #0056b3; }
+  </style>
+</head>
+<body>
+
+  <div class="card" id="formCard">
+    <h2>Smart PTW System</h2>
+    
+    <div class="form-group">
+      <label>تفاصيل تصريح العمل الحالي:</label>
+      <div class="static-table">
+        <table>
+          <tr><td style="width:35%;"><b>رقم التصريح:</b></td><td id="lblPermitNo">--</td></tr>
+          <tr><td><b>الموقع:</b></td><td id="lblLocation">--</td></tr>
+          <tr><td><b>وصف العمل:</b></td><td id="lblDesc">--</td></tr>
+          <tr><td><b>المشرف المسؤول:</b></td><td id="lblSupervisor">--</td></tr>
+          <tr><td><b>عدد العمال:</b></td><td id="lblWorkers">--</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>ملاحظات المدير (Manager Comment) *</label>
+      <textarea id="comment" placeholder="اكتب ملاحظاتك أو أسباب الرفض هنا..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>اتخاذ القرار النهائى (Decision) *</label>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" id="approve" name="decision" value="Approved">
+          <label style="margin:0; cursor:pointer;" for="approve">Approve (اعتماد التصريح)</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" id="reject" name="decision" value="Rejected">
+          <label style="margin:0; cursor:pointer;" for="reject">Reject (رفض التصريح)</label>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn" onclick="submitData()">إرسال القرار النهائى</button>
+  </div>
+
+  <script>
+    // 1. قراءة البيانات من الـ URL القادم من الأبلكيشن
+    var urlParams = new URLSearchParams(window.location.search);
+    var permitNo = urlParams.get('permitNo');
+    
+    // فك التشفير الآمن لحماية نصوص اللغة العربية والمسافات على الموبايل
+    var locationData = safeDecode(urlParams.get('location'), "غير محدد");
+    var descData = safeDecode(urlParams.get('desc'), "غير محدد");
+    var supervisorData = safeDecode(urlParams.get('supervisor'), "غير محدد");
+    var workersData = urlParams.get('workers') || "0";
+
+    // دالة مساعدة لفك التشفير بأمان بدون أن تسبب كراش لو النص فارغ
+    function safeDecode(encodedString, defaultValue) {
+      if (!encodedString) return defaultValue;
+      try {
+        return decodeURIComponent(encodedString.replace(/\+/g, " "));
+      } catch (e) {
+        return encodedString; // رجع النص الأصلي لو حصل مشكلة
+      }
+    }
+
+    // عرض البيانات النظيفة داخل الجدول فور فتح الصفحة
+    window.onload = function() {
+      document.getElementById("lblPermitNo").innerText = permitNo || "--";
+      document.getElementById("lblLocation").innerText = locationData;
+      document.getElementById("lblDesc").innerText = descData;
+      document.getElementById("lblSupervisor").innerText = supervisorData;
+      document.getElementById("lblWorkers").innerText = workersData;
+    };
+
+    function submitData() {
+      var comment = document.getElementById("comment").value;
+      var decisionElement = document.querySelector('input[name="decision"]:checked');
+      
+      if (!comment || !decisionElement) {
+        alert("برجاء كتابة الملاحظات واختيار القرار أولاً!");
+        return;
+      }
+      
+      var decision = decisionElement.value;
+      document.getElementById("formCard").innerHTML = "<h3 style='text-align:center; color:#007bff;'>جاري إرسال قرارك وتحديث الفايربيز...</h3>";
+
+      // 2. تحديث الفايربيز مباشرة عن طريق الـ REST API وبدون أي وسيط خارجي!
+      var firebaseUrl = "https://smart-ptw-system-default-rtdb.firebaseio.com/Permits/" + permitNo + ".json";
+      
+      var payload = {
+        "Status": decision,
+        "ManagerComment": comment,
+        "ActionDate": new Date().toISOString()
+      };
+
+      fetch(firebaseUrl, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(function(response) {
+        if(response.ok) {
+          document.getElementById("formCard").innerHTML = 
+            "<div style='text-align:center; padding: 20px;'> " +
+            "<h2 style='color:#28a745;'>✓ تم تسجيل الرد بنجاح</h2>" +
+            "<p style='font-weight:bold; color:#333;'>تم حفظ القرار وتحديث قاعدة البيانات بنجاح.</p>" +
+            "</div>";
+        } else {
+          document.getElementById("formCard").innerHTML = 
+            "<div style='text-align:center; padding: 20px; color:#dc3545;'> " +
+            "<h2>❌ فشل حفظ القرار</h2>" +
+            "<p>يرجى التحقق من اتصال الإنترنت والمحاولة مجدداً.</p>" +
+            "</div>";
+        }
+      })
+      .catch(function(error) {
+        alert("فشل الاتصال بالخادم الرئيسي للفايربيز.");
+      });
+    }
+  </script>
+</body>
+</html>
