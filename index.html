@@ -1,141 +1,198 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart PTW System - الاعتماد الإلكتروني</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Smart Permit to Work - Decision</title>
   <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; direction: rtl; padding: 20px; margin: 0; }
-    .card { max-width: 500px; background: white; margin: 20px auto; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 6px solid #001F54; }
-    h2 { color: #001F54; text-align: center; margin-bottom: 20px; }
-    .form-group { margin-bottom: 15px; }
-    label { font-weight: bold; display: block; margin-bottom: 6px; color: #333; }
-    .static-table { width: 100%; background-color: #e9ecef; border-radius: 8px; border: 1px solid #ced4da; padding: 10px; font-size: 15px; color: #495057; box-sizing: border-box; }
-    .static-table table { width: 100%; border-collapse: collapse; }
-    .static-table td { padding: 8px; border-bottom: 1px solid #dee2e6; }
-    .static-table tr:last-child td { border-bottom: none; }
-    textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ced4da; box-sizing: border-box; resize: vertical; min-height: 70px; }
-    .radio-group { background: #f8f9fa; padding: 12px; border-radius: 8px; border: 1px solid #ced4da; }
-    .radio-option { margin-bottom: 10px; display: flex; align-items: center; }
-    .radio-option:last-child { margin-bottom: 0; }
-    input[type="radio"] { width: 18px; height: 18px; margin-left: 10px; cursor: pointer; }
-    .btn { width: 100%; background-color: #007bff; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-    .btn:hover { background-color: #0056b3; }
+    :root {
+      --primary-dark: #0A1929; /* لون الخلفية العلوي من تصميم MAUI */
+      --btn-green: #4CAF50;
+      --btn-red: #E57373;
+      --btn-navy: #001F54;
+      --txt-gray: #6C757D;
+      --input-bg: #FFFFFF;
+      --lbl-color: #333333;
+    }
+    body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #FFFFFF; direction: ltr; padding: 0; margin: 0; overflow-x: hidden; }
+    
+    /* الجزء العلوي - الهيدر (الأزرق الداكن) */
+    .header { background-color: var(--primary-dark); color: white; padding: 30px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+    .back-icon { position: absolute; left: 20px; top: 25px; color: white; font-size: 24px; text-decoration: none; }
+    .close-icon { position: absolute; right: 20px; top: 25px; color: white; font-size: 24px; text-decoration: none; }
+    
+    .header h2 { margin: 10px 0 5px 0; font-size: 20px; font-weight: normal; }
+    .sub-title { font-size: 16px; color: #CCCCCC; margin: 0; }
+    .details-text { font-size: 14px; color: #FFFFFF; font-weight: normal; margin: 15px 0 5px 0; line-height: 1.4; }
+
+    /* الجزء السفلي - الحاوية البيضاء (The Card) */
+    .card-container { background-color: #FFFFFF; border-top-left-radius: 30px; border-top-right-radius: 30px; margin-top: -30px; padding: 30px 20px; min-height: 50vh; box-shadow: 0 -10px 20px rgba(0,0,0,0.1); position: relative; z-index: 10; }
+    
+    .form-group { margin-bottom: 25px; width: 100%; box-sizing: border-box; }
+    
+    /* تنسيق رقم التصريح (Permit ID) */
+    .id-display { background-color: #F0F2F5; border-radius: 12px; padding: 20px; text-align: center; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; width: 100%; box-sizing: border-box;}
+    .id-label { font-size: 16px; color: var(--txt-gray); }
+    .id-value { font-size: 16px; color: #000; font-weight: bold; margin-left: 10px; }
+
+    /* تنسيق ملاحظات المدير (Manager Comment) */
+    .comment-label { font-size: 16px; font-weight: bold; color: var(--lbl-color); display: block; margin-bottom: 12px; text-align: left; }
+    textarea { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #ced4da; box-sizing: border-box; resize: none; min-height: 120px; font-size: 14px; background-color: var(--input-bg); }
+    textarea::placeholder { color: #A0A0A0; text-align: left; /* للمحاذاة كما في MAUI */ }
+
+    /* تنسيق أزرار القرار (Approve / Reject) */
+    .decision-container { display: flex; gap: 15px; width: 100%; }
+    .decision-btn { flex: 1; text-align: center; border-radius: 10px; padding: 18px 10px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; box-sizing: border-box;}
+    .btn-icon { width: 20px; height: 20px; }
+    
+    .approve-btn { background-color: #C8E6C9; color: #33691E; border: 2px solid var(--btn-green); }
+    .approve-btn.active { background-color: var(--btn-green); color: white; border: 2px solid var(--btn-green); }
+    
+    .reject-btn { background-color: #FFCDD2; color: #B71C1C; border: 2px solid var(--btn-red); }
+    .reject-btn.active { background-color: var(--btn-red); color: white; border: 2px solid var(--btn-red); }
+
+    /* تنسيق زر الإرسال النهائي (Submit) */
+    .submit-btn { width: 100%; background-color: var(--btn-navy); color: white; padding: 18px; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; box-sizing: border-box; }
+    .submit-btn:disabled { background-color: var(--txt-gray); cursor: not-allowed;}
+
   </style>
 </head>
 <body>
 
-  <div class="card" id="formCard">
-    <h2>Smart PTW System</h2>
-    
-    <div class="form-group">
-      <label>تفاصيل تصريح العمل الحالي:</label>
-      <div class="static-table">
-        <table>
-          <tr><td style="width:35%;"><b>رقم التصريح:</b></td><td id="lblPermitNo">--</td></tr>
-          <tr><td><b>الموقع:</b></td><td id="lblLocation">--</td></tr>
-          <tr><td><b>وصف العمل:</b></td><td id="lblDesc">--</td></tr>
-          <tr><td><b>المشرف المسؤول:</b></td><td id="lblSupervisor">--</td></tr>
-          <tr><td><b>عدد العمال:</b></td><td id="lblWorkers">--</td></tr>
-        </table>
-      </div>
+  <div class="main-layout" id="formCard">
+    <!-- الجزء العلوي - الهيدر (MAUI Top-section) -->
+    <div class="header">
+      <a href="#" class="back-icon">&#10094;</a>
+      <a href="#" class="close-icon">&#10005;</a>
+      <h2>Permit to Work</h2>
+      <p class="sub-title">(Smart Permit to Work)</p>
+      <p class="details-text">Current Work Permit Details:<br>Please review and select your final decision below.</p>
     </div>
 
-    <div class="form-group">
-      <label>ملاحظات المدير (Manager Comment) *</label>
-      <textarea id="comment" placeholder="اكتب ملاحظاتك أو أسباب الرفض هنا..."></textarea>
-    </div>
-
-    <div class="form-group">
-      <label>اتخاذ القرار النهائى (Decision) *</label>
-      <div class="radio-group">
-        <div class="radio-option">
-          <input type="radio" id="approve" name="decision" value="Approved">
-          <label style="margin:0; cursor:pointer;" for="approve">Approve (اعتماد التصريح)</label>
-        </div>
-        <div class="radio-option">
-          <input type="radio" id="reject" name="decision" value="Rejected">
-          <label style="margin:0; cursor:pointer;" for="reject">Reject (رفض التصريح)</label>
+    <!-- الجزء السفلي - فورم اتخاذ القرار (MAUI Form-section) -->
+    <div class="card-container">
+      
+      <!-- عرض رقم التصريح (يتلقى البيانات من URL) -->
+      <div class="form-group">
+        <div class="id-display">
+          <span class="id-label">Permit ID:</span>
+          <span class="id-value" id="lblPermitNo">Loading...</span>
         </div>
       </div>
-    </div>
 
-    <button class="btn" onclick="submitData()">إرسال القرار النهائى</button>
+      <!-- ملاحظات المدير -->
+      <div class="form-group">
+        <label class="comment-label">Manager Comment *</label>
+        <textarea id="comment" placeholder="Type your comments or rejection reasons here..."></textarea>
+      </div>
+
+      <!-- أزرار اتخاذ القرار (Approve / Reject) -->
+      <div class="form-group decision-container">
+        <button class="decision-btn approve-btn" onclick="selectDecision('Approved')" id="btnApprove">
+          <img src="https://img.icons8.com/material-rounded/24/33691E/checked--v1.png" class="btn-icon" id="iconApprove">
+          Approve
+        </button>
+        <button class="decision-btn reject-btn" onclick="selectDecision('Rejected')" id="btnReject">
+          <img src="https://img.icons8.com/material-outlined/24/B71C1C/multiply.png" class="btn-icon" id="iconReject">
+          Reject
+        </button>
+      </div>
+
+      <!-- زر الإرسال النهائي -->
+      <button class="submit-btn" id="submitBtn" onclick="submitData()">Submit Final Decision</button>
+    </div>
   </div>
 
   <script>
     // 1. قراءة البيانات من الـ URL القادم من الأبلكيشن
     var urlParams = new URLSearchParams(window.location.search);
-    var permitNo = urlParams.get('permitNo');
-    
-    // فك التشفير الآمن لحماية نصوص اللغة العربية والمسافات على الموبايل
-    var locationData = safeDecode(urlParams.get('location'), "غير محدد");
-    var descData = safeDecode(urlParams.get('desc'), "غير محدد");
-    var supervisorData = safeDecode(urlParams.get('supervisor'), "غير محدد");
-    var workersData = urlParams.get('workers') || "0";
+    var permitNo = urlParams.get('permitNo'); // هذا هو رقم التصريح الذي سيتم سحبه تلقائيًا
+    var selectedDecision = null;
 
-    // دالة مساعدة لفك التشفير بأمان بدون أن تسبب كراش لو النص فارغ
-    function safeDecode(encodedString, defaultValue) {
-      if (!encodedString) return defaultValue;
-      try {
-        return decodeURIComponent(encodedString.replace(/\+/g, " "));
-      } catch (e) {
-        return encodedString; // رجع النص الأصلي لو حصل مشكلة
+    //عرض البيانات فور فتح الصفحة
+    window.onload = function() {
+      if (!permitNo) {
+        document.getElementById("formCard").innerHTML = 
+          "<div style='text-align:center; padding:50px; color:#dc3545;'>" +
+          "<h2>⚠️ Error: Link Invalid</h2><p>The Permit ID is missing.</p></div>";
+        return;
+      }
+      document.getElementById("lblPermitNo").innerText = permitNo;
+    };
+
+    // دالة اختيار القرار وتغيير مظهر الأزرار (Approve/Reject)
+    function selectDecision(decision) {
+      selectedDecision = decision;
+      var btnApprove = document.getElementById("btnApprove");
+      var btnReject = document.getElementById("btnReject");
+      var iconApprove = document.getElementById("iconApprove");
+      var iconReject = document.getElementById("iconReject");
+
+      if (decision === 'Approved') {
+        btnApprove.classList.add('active');
+        btnReject.classList.remove('active');
+        // تغيير لون الأيقونات لتكون بيضاء عند التفعيل
+        iconApprove.src = "https://img.icons8.com/material-rounded/24/FFFFFF/checked--v1.png";
+        iconReject.src = "https://img.icons8.com/material-outlined/24/B71C1C/multiply.png"; // العودة للون الأصلي
+      } else {
+        btnReject.classList.add('active');
+        btnApprove.classList.remove('active');
+        iconApprove.src = "https://img.icons8.com/material-rounded/24/33691E/checked--v1.png"; // العودة للون الأصلي
+        iconReject.src = "https://img.icons8.com/material-outlined/24/FFFFFF/multiply.png"; // تغيير لون الأيقونات لتكون بيضاء عند التفعيل
       }
     }
 
-    // عرض البيانات النظيفة داخل الجدول فور فتح الصفحة
-    window.onload = function() {
-      document.getElementById("lblPermitNo").innerText = permitNo || "--";
-      document.getElementById("lblLocation").innerText = locationData;
-      document.getElementById("lblDesc").innerText = descData;
-      document.getElementById("lblSupervisor").innerText = supervisorData;
-      document.getElementById("lblWorkers").innerText = workersData;
-    };
-
     function submitData() {
       var comment = document.getElementById("comment").value;
-      var decisionElement = document.querySelector('input[name="decision"]:checked');
       
-      if (!comment || !decisionElement) {
-        alert("برجاء كتابة الملاحظات واختيار القرار أولاً!");
+      if (!comment || !selectedDecision) {
+        alert("Please type your comments and select your decision first.");
         return;
       }
       
-      var decision = decisionElement.value;
-      document.getElementById("formCard").innerHTML = "<h3 style='text-align:center; color:#007bff;'>جاري إرسال قرارك وتحديث الفايربيز...</h3>";
+      // تغيير واجهة المستخدم لإظهار حالة التحميل
+      document.getElementById("formCard").innerHTML = 
+          "<div style='text-align:center; padding: 50px 20px;'> " +
+          "<h2 style='color:var(--primary-dark);'>✓ Processing your decision...</h2>" +
+          "<p style='font-weight:normal; color:var(--txt-gray);'>Saving to the database.</p>" +
+          "</div>";
 
       // 2. تحديث الفايربيز مباشرة عن طريق الـ REST API وبدون أي وسيط خارجي!
+      // (ملاحظة: تأكد من أن قواعد بيانات Firebase لديك تسمح بالكتابة)
       var firebaseUrl = "https://smart-ptw-system-default-rtdb.firebaseio.com/Permits/" + permitNo + ".json";
       
       var payload = {
-        "Status": decision,
+        "Status": selectedDecision,
         "ManagerComment": comment,
         "ActionDate": new Date().toISOString()
       };
 
       fetch(firebaseUrl, {
-        method: 'PATCH',
+        method: 'PATCH', // استخدام PATCH لتحديث الحقول المحددة فقط
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
       .then(function(response) {
         if(response.ok) {
           document.getElementById("formCard").innerHTML = 
-            "<div style='text-align:center; padding: 20px;'> " +
-            "<h2 style='color:#28a745;'>✓ تم تسجيل الرد بنجاح</h2>" +
-            "<p style='font-weight:bold; color:#333;'>تم حفظ القرار وتحديث قاعدة البيانات بنجاح.</p>" +
+            "<div style='text-align:center; padding: 50px 20px;'> " +
+            "<h2 style='color:#28a745;'>✓ Decision Submitted Successfully</h2>" +
+            "<p style='font-weight:normal; color:var(--txt-gray);'>Permit #" + permitNo + " has been updated.</p>" +
             "</div>";
         } else {
           document.getElementById("formCard").innerHTML = 
-            "<div style='text-align:center; padding: 20px; color:#dc3545;'> " +
-            "<h2>❌ فشل حفظ القرار</h2>" +
-            "<p>يرجى التحقق من اتصال الإنترنت والمحاولة مجدداً.</p>" +
+            "<div style='text-align:center; padding: 50px 20px;'> " +
+            "<h2 style='color:#dc3545;'>❌ Submission Failed</h2>" +
+            "<p style='font-weight:normal; color:var(--txt-gray);'>There was an error saving your decision. Please try again later.</p>" +
             "</div>";
         }
       })
       .catch(function(error) {
-        alert("فشل الاتصال بالخادم الرئيسي للفايربيز.");
+         document.getElementById("formCard").innerHTML = 
+            "<div style='text-align:center; padding: 50px 20px;'> " +
+            "<h2 style='color:#dc3545;'>❌ Connection Error</h2>" +
+            "<p style='font-weight:normal; color:var(--txt-gray);'>Could not connect to the database.</p>" +
+            "</div>";
       });
     }
   </script>
