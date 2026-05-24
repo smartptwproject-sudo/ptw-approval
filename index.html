@@ -160,10 +160,13 @@
           "</div>";
 
       var firebaseUrl = "https://smart-ptw-system-default-rtdb.firebaseio.com/Permits/" + permitNo + ".json";
+      
+      // 🎯 التعديل الجوهري هنا: إضافة حقل الـ IsPdfStamped كـ false ليلقطه الأبلكيشن أوتوماتيكياً
       var payload = {
         "Status": selectedDecision,
         "ManagerComment": comment,
-        "ActionDate": new Date().toISOString()
+        "ActionDate": new Date().toISOString(),
+        "IsPdfStamped": false
       };
 
       fetch(firebaseUrl, {
