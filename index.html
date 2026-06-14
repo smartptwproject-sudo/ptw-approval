@@ -167,20 +167,23 @@
 
       var firebaseUrl = "https://smart-ptw-system-default-rtdb.firebaseio.com/Permits/" + permitNo + ".json";
       
-      // 🎯 تحديد الحالة بناءً على كبسة زرار المدير (Approved -> Senior Review / Rejected -> Rejected)
       var finalStatus = (selectedDecision === 'Approved') ? "Waiting for HSE Senior Review" : "Rejected by Manager";
 
+      // 🎯 التعديل الجوهري: بنبعت الأسامي المطابقة لكلاس الـ ViewModel بتاعك بالظبط وبدون قيم ثابتة
       var payload = {
         "Status": finalStatus, 
         "ManagerComment": comment,
         "ActionDate": new Date().toISOString(),
         "IsPdfStamped": true,
         "PermitNo": permitNo,
-        "IssuerName": existingPermitData.IssuerName || "HSE Engineer",
-        "WorkLoc": existingPermitData.WorkLoc || "Site",
-        "WorkDesc": existingPermitData.WorkDesc || "Work Permit",
-        "Supervisor": existingPermitData.Supervisor || "غير محدد",
-        "IssuerEmail": existingPermitData.IssuerEmail || "SmartPTW.Project@gmail.com",
+        
+        // سحب الداتا الديناميكية اللي جاية من الأبلكيشن وبدون وضع كلام ثابت لو مش موجودة
+        "EngineerName": existingPermitData.IssuerName || existingPermitData.EngineerName || "",
+        "WorkLoc": existingPermitData.WorkLoc || existingPermitData.Location || "",
+        "WorkDesc": existingPermitData.WorkDesc || "",
+        "SupervisorName": existingPermitData.Supervisor || existingPermitData.SupervisorName || "",
+        
+        "IssuerEmail": existingPermitData.IssuerEmail || "",
         "Approvals": existingPermitData.Approvals || null
       };
 
