@@ -92,8 +92,9 @@
     var urlParams = new URLSearchParams(window.location.search);
     var permitNo = urlParams.get('permitNo');
     var selectedDecision = null;
+    var existingPermitData = {}; // 🎯 مخزن سري ذكي لحفظ بيانات الأبلكيشن قبل التعديل
 
-    // 🎯 دالة الفحص الفوري لمنع التكرار (تم تحديث الشروط لتشمل الحالات الجديدة)
+    // 🎯 دالة الفحص الفوري المحدثة لحفظ البيانات الأصلية
     window.onload = function() {
       if (!permitNo) {
         document.getElementById("formCard").innerHTML = 
@@ -102,21 +103,27 @@
         return;
       }
       
-      var checkUrl = "https://smart-ptw-system-default-rtdb.firebaseio.com/Permits/" + permitNo + "/Status.json";
+      var checkUrl = "https://smart-ptw-system-default-rtdb.firebaseio.com/Permits/" + permitNo + ".json";
       
       fetch(checkUrl)
       .then(function(response) {
         if (response.ok) return response.json();
         return null;
       })
-      .then(function(status) {
-        if (status === "Approved & Closed for Work" || status === "Waiting for HSE Senior Review" || status === "Rejected by HSE Senior") {
-          document.getElementById("formCard").innerHTML = 
-            "<div style='text-align:center; padding:60px 20px; font-family:Arial; direction:rtl;'> " +
-            "<div style='border:2px solid #dc3545; border-radius:15px; background-color:#fff5f5; padding:25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);'> " +
-            "<h2 style='color:#dc3545; margin-top:0;'>⚠️ تنبيه هام</h2> " +
-            "<p style='font-size:16px; color:#333; font-weight:bold; line-height:1.6;'>عفواً، هذا الرابط تم استخدامه مسبقاً لاتخاذ القرار ولا يمكن الدخول إليه مجدداً!</p> " +
-            "</div></div>";
+      .then(function(data) {
+        if (data) {
+          existingPermitData = data; // 🎯 الاحتفاظ بكافة بيانات الموقع والمهندس والوصف المدخلة من التطبيق
+          var status = data.Status;
+          if (status === "Approved & Closed for Work" || status === "Waiting for HSE Senior Review" || status === "Rejected by HSE Senior") {
+            document.getElementById("formCard").innerHTML = 
+              "<div style='text-align:center; padding:60px 20px; font-family:Arial; direction:rtl;'> " +
+              "<div style='border:2px solid #dc3545; border-radius:15px; background-color:#fff5f5; padding:25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);'> " +
+              "<h2 style='color:#dc3545; margin-top:0;'>⚠️ تنبيه هام</h2> " +
+              "<p style='font-size:16px; color:#333; font-weight:bold; line-height:1.6;'>عفواً، هذا الرابط تم استخدامه مسبقاً لاتخاذ القرار ولا يمكن الدخول إليه مجدداً!</p> " +
+              "</div></div>";
+          } else {
+            document.getElementById("lblPermitNo").innerText = permitNo;
+          }
         } else {
           document.getElementById("lblPermitNo").innerText = permitNo;
         }
@@ -161,12 +168,19 @@
 
       var firebaseUrl = "https://smart-ptw-system-default-rtdb.firebaseio.com/Permits/" + permitNo + ".json";
       
-      // 🎯 التعديل الجوهري هنا: بنخلي الويب يبعت الداتا ويغير الحالة لـ Waiting for HSE Senior Review علطول
+      // 🎯 التعديل الجوهري والمطلوب فقط: دمج قيم المعاينة القادمة من الفايربيز مع قيم التحديث الجديد لحمايتها
       var payload = {
         "Status": "Waiting for HSE Senior Review", 
         "ManagerComment": comment,
         "ActionDate": new Date().toISOString(),
-        "IsPdfStamped": true
+        "IsPdfStamped": true,
+        "PermitNo": permitNo,
+        "IssuerName": existingPermitData.IssuerName || "HSE Engineer",
+        "WorkLoc": existingPermitData.WorkLoc || "Site",
+        "WorkDesc": existingPermitData.WorkDesc || "Work Permit",
+        "Supervisor": existingPermitData.Supervisor || "غير محدد",
+        "IssuerEmail": existingPermitData.IssuerEmail || "SmartPTW.Project@gmail.com",
+        "Approvals": existingPermitData.Approvals || null
       };
 
       fetch(firebaseUrl, {
