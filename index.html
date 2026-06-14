@@ -92,9 +92,8 @@
     var urlParams = new URLSearchParams(window.location.search);
     var permitNo = urlParams.get('permitNo');
     var selectedDecision = null;
-    var existingPermitData = {}; // 🎯 مخزن سري ذكي لحفظ بيانات الأبلكيشن قبل التعديل
+    var existingPermitData = {}; 
 
-    // 🎯 دالة الفحص الفوري المحدثة لحفظ البيانات الأصلية
     window.onload = function() {
       if (!permitNo) {
         document.getElementById("formCard").innerHTML = 
@@ -112,7 +111,7 @@
       })
       .then(function(data) {
         if (data) {
-          existingPermitData = data; // 🎯 الاحتفاظ بكافة بيانات الموقع والمهندس والوصف المدخلة من التطبيق
+          existingPermitData = data; 
           var status = data.Status;
           if (status === "Approved & Closed for Work" || status === "Waiting for HSE Senior Review" || status === "Rejected by HSE Senior") {
             document.getElementById("formCard").innerHTML = 
@@ -168,9 +167,11 @@
 
       var firebaseUrl = "https://smart-ptw-system-default-rtdb.firebaseio.com/Permits/" + permitNo + ".json";
       
-      // 🎯 التعديل الجوهري والمطلوب فقط: دمج قيم المعاينة القادمة من الفايربيز مع قيم التحديث الجديد لحمايتها
+      // 🎯 تحديد الحالة بناءً على كبسة زرار المدير (Approved -> Senior Review / Rejected -> Rejected)
+      var finalStatus = (selectedDecision === 'Approved') ? "Waiting for HSE Senior Review" : "Rejected by Manager";
+
       var payload = {
-        "Status": "Waiting for HSE Senior Review", 
+        "Status": finalStatus, 
         "ManagerComment": comment,
         "ActionDate": new Date().toISOString(),
         "IsPdfStamped": true,
